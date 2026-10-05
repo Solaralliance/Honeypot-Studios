@@ -13,7 +13,7 @@ from datetime import date
 from pathlib import Path
 
 REPO = Path("/app")
-DOMAIN = "https://honeypotstudio.com.au"
+DOMAIN = "https://honeypot.com.au"
 
 STATIC_ROUTES = [
     ("/", "1.0", "weekly"),

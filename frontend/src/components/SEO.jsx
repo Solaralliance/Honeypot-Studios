@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async";
 
 const SITE = "HoneyPot Studio";
-const BASE_URL = "https://honeypotstudio.com.au";
+const BASE_URL = "https://honeypot.com.au";
 
 const SEO = ({ title, description, path = "/", image, imageAlt, type = "website", jsonLd }) => {
   const fullTitle = title ? `${title} | ${SITE}` : `${SITE} — We Build Websites That Work`;

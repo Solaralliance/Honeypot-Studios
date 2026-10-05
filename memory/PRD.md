@@ -17,8 +17,11 @@ Marketing site for HoneyPot website design studio: live website showcase carouse
 - Scripts: /app/scripts/secret_scan.py (pre-commit/deploy secret gate), /app/scripts/lint_check.py (py_compile + flake8 E9/F + eslint flat config)
 - SEO: index.html meta/OG/Twitter/JSON-LD + per-page Helmet; favicon.svg/ico/apple-touch-icon + site.webmanifest
 
-## Implemented (2026-10-05, update 3)
-- Case study pages at /work/:slug for all 4 projects: overview, challenge, what-we-built, stack chips, results grid, testimonial block, related projects, CaseStudy JSON-LD. Results/quotes are HONEST placeholder slots ("—" + visible disclaimer, quote card says "coming soon") — no fabricated testimonials; owner to supply real figures/quotes
+## Implemented (2026-10-05, update 4)
+- Real domain applied: honeypot.com.au (owned by user, DNS on Cloudflare) — canonical URLs, OG/Twitter tags, JSON-LD, robots.txt and sitemap.xml all point at it; sitemap regenerated and verified live
+- STILL PENDING FROM USER: real business email for OWNER_EMAIL (currently test sink delivered@resend.dev), GA4 Measurement ID, Meta Pixel ID, real results + client quotes per project
+
+## Implemented (2026-10-05, update 3): overview, challenge, what-we-built, stack chips, results grid, testimonial block, related projects, CaseStudy JSON-LD. Results/quotes are HONEST placeholder slots ("—" + visible disclaimer, quote card says "coming soon") — no fabricated testimonials; owner to supply real figures/quotes
 - Carousel cards now link "Full case study" + "Live preview"
 - scripts/build_sitemap.py generates public/sitemap.xml from real content sources (blog_data.py slugs + portfolio.js ids) — 11 URLs; public/robots.txt points to it; both serve 200 (application/xml)
 - STILL PENDING FROM USER: real business email for OWNER_EMAIL (currently test sink delivered@resend.dev), GA4 Measurement ID, Meta Pixel ID, real results + client quotes per project
