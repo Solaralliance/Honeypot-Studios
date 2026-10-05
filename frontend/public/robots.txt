@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://honeypot.com.au/sitemap.xml
+Sitemap: https://myscapez.com/sitemap.xml

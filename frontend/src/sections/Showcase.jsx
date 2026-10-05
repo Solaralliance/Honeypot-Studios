@@ -40,7 +40,8 @@ const Showcase = () => {
           effect="coverflow"
           grabCursor
           centeredSlides
-          loop
+          loop={false}
+          rewind
           slidesPerView={1.15}
           breakpoints={{
             768: { slidesPerView: 1.6 },

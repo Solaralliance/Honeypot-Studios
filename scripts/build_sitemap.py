@@ -13,12 +13,14 @@ from datetime import date
 from pathlib import Path
 
 REPO = Path("/app")
-DOMAIN = "https://honeypot.com.au"
+DOMAIN = "https://myscapez.com"
 
 STATIC_ROUTES = [
     ("/", "1.0", "weekly"),
     ("/blog", "0.8", "weekly"),
+    ("/learn", "0.9", "weekly"),
     ("/privacy-security", "0.3", "yearly"),
+    ("/terms", "0.3", "yearly"),
 ]
 
 
@@ -30,6 +32,11 @@ def blog_slugs() -> list:
 def project_ids() -> list:
     text = (REPO / "frontend" / "src" / "data" / "portfolio.js").read_text()
     return re.findall(r'id:\s*"([a-z0-9-]+)"', text)
+
+
+def learn_slugs() -> list:
+    text = (REPO / "backend" / "learn_data.py").read_text()
+    return re.findall(r'"slug":\s*"([a-z0-9-]+)"', text)
 
 
 def url_entry(loc: str, priority: str, changefreq: str, lastmod: str) -> str:
@@ -47,6 +54,7 @@ def main() -> int:
     today = date.today().isoformat()
     entries = [url_entry(r, p, c, today) for r, p, c in STATIC_ROUTES]
     entries += [url_entry(f"/blog/{s}", "0.7", "monthly", today) for s in blog_slugs()]
+    entries += [url_entry(f"/learn/{s}", "0.8", "monthly", today) for s in learn_slugs()]
     entries += [url_entry(f"/work/{p}", "0.8", "monthly", today) for p in project_ids()]
 
     xml = (

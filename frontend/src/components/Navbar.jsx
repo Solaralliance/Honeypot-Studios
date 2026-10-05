@@ -10,8 +10,6 @@ import {
 import NeonButton from "@/components/NeonButton";
 import GradientText from "@/components/GradientText";
 
-const LOGO_URL = "https://customer-assets-eiarnc6j.emergentagent.net/job_8a876f68-14ba-49e3-84f0-dfe2beb700a7/artifacts/dm7w1hq2_22101766-41AF-479A-B542-D065C2D735C6.webp";
-
 export const SERVICE_MENU = [
   { icon: Target, label: "Landing Pages", price: "from $548", href: "/#services" },
   { icon: HardHat, label: "Tradie Websites", price: "from $1,048", href: "/#services" },
@@ -26,7 +24,9 @@ const NAV_LINKS = [
   { label: "What We Build", href: "/#build-types" },
   { label: "Work", href: "/#work" },
   { label: "Pricing", href: "/#pricing" },
+  { label: "Buy Website", href: "/#buy-website" },
   { label: "Blog", href: "/blog" },
+  { label: "Learn", href: "/learn" },
 ];
 
 const Navbar = () => {
@@ -35,16 +35,7 @@ const Navbar = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 hp-glass" data-testid="navbar">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <Link to="/" className="flex items-center gap-3" data-testid="nav-logo-link" aria-label="HoneyPot Studio home">
-          <img
-            src={LOGO_URL}
-            alt="HoneyPot Studio logo — hexagonal honeycomb mark dissolving into particles"
-            className="h-9 w-auto rounded-md"
-            width={36}
-            height={36}
-            loading="eager"
-            decoding="async"
-          />
+        <Link to="/" className="flex items-center" data-testid="nav-logo-link" aria-label="HoneyPot Studio home">
           <span className="font-display text-lg font-bold tracking-tight">
             Honey<GradientText>Pot</GradientText>
           </span>
@@ -117,6 +108,7 @@ const Navbar = () => {
                 key={item.label}
                 href={item.href}
                 onClick={() => setOpen(false)}
+                data-testid={`nav-mobile-service-${item.label.toLowerCase().replace(/[^a-z]+/g, "-")}`}
                 className="flex items-center gap-3 rounded-lg px-2 py-2 text-sm text-zinc-300 transition-colors hover:bg-white/5"
               >
                 <item.icon className="h-4 w-4 text-fuchsia-400" aria-hidden="true" />
@@ -131,6 +123,7 @@ const Navbar = () => {
                 key={link.label}
                 href={link.href}
                 onClick={() => setOpen(false)}
+                data-testid={`nav-mobile-link-${link.label.toLowerCase().replace(/[^a-z]+/g, "-")}`}
                 className="text-sm font-medium text-zinc-300"
               >
                 {link.label}

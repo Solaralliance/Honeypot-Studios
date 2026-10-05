@@ -10,6 +10,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export const track = (event, meta = {}) => {
   try {
+    if (localStorage.getItem("hp-analytics-consent") !== "accepted") return;
     fetch(`${API}/analytics/event`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -19,4 +20,9 @@ export const track = (event, meta = {}) => {
   } catch {
     /* analytics must never break the page */
   }
+};
+
+export const setAnalyticsConsent = (value) => {
+  localStorage.setItem("hp-analytics-consent", value);
+  window.dispatchEvent(new CustomEvent("hp:analytics-consent", { detail: value }));
 };

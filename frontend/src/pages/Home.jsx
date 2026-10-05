@@ -10,6 +10,8 @@ import Pricing from "@/sections/Pricing";
 import Showcase from "@/sections/Showcase";
 import BlogPreview from "@/sections/BlogPreview";
 import Contact from "@/sections/Contact";
+import BuyWebsite from "@/sections/BuyWebsite";
+import { ReturningOffer } from "@/components/ReturningOffer";
 
 const Home = () => (
   <>
@@ -26,11 +28,13 @@ const Home = () => (
       <Services />
       <BuildTypes />
       <Pricing />
+      <BuyWebsite />
       <Showcase />
       <BlogPreview />
       <Contact />
     </main>
     <Footer />
+    <ReturningOffer />
   </>
 );
 

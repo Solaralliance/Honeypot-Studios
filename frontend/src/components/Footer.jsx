@@ -12,6 +12,7 @@ const SITEMAP = [
       { label: "Who It's For", href: "/#who" },
       { label: "Our Work", href: "/#work" },
       { label: "Blog", href: "/blog" },
+      { label: "Myscapez Learn Hub", href: "/learn" },
       { label: "Contact", href: "/#contact" },
     ],
   },
@@ -21,6 +22,7 @@ const SITEMAP = [
       { label: "Services & Packages", href: "/#services" },
       { label: "What We Build (Sites, Apps, CRMs)", href: "/#build-types" },
       { label: "Pricing", href: "/#pricing" },
+      { label: "Buy a Website", href: "/#buy-website" },
       { label: "Extras & Add-ons", href: "/#extras" },
     ],
   },
@@ -57,7 +59,7 @@ const Footer = () => (
           <ul className="mt-4 space-y-2 text-sm text-zinc-400">
             {col.links.map((link) => (
               <li key={link.label}>
-                {link.href.startsWith("/blog") ? (
+                {link.href.startsWith("/blog") || link.href.startsWith("/learn") ? (
                   <Link to={link.href} className="transition-colors hover:text-white" data-testid={`footer-link-${link.label.toLowerCase().replace(/[^a-z]+/g, "-")}`}>
                     {link.label}
                   </Link>
@@ -80,13 +82,21 @@ const Footer = () => (
               <ShieldCheck className="h-4 w-4 text-cyan-400" /> Security &amp; Privacy
             </Link>
           </li>
+          <li>
+            <Link to="/terms" className="transition-colors hover:text-white" data-testid="footer-link-terms">Terms &amp; Conditions</Link>
+          </li>
+          <li>
+            <Link to="/unsubscribe" className="transition-colors hover:text-white" data-testid="footer-link-unsubscribe">Unsubscribe from offers</Link>
+          </li>
           <li className="text-zinc-500">No lock-in contracts. You own your site.</li>
           <li className="text-zinc-500">Secrets stay in env files — never in git.</li>
+          <li><a href="tel:+61480733936" className="transition-colors hover:text-white" data-testid="footer-phone-link">0480 733 936</a></li>
+          <li><a href="mailto:honeypotweb@proton.me" className="break-all transition-colors hover:text-white" data-testid="footer-email-link">honeypotweb@proton.me</a></li>
         </ul>
       </div>
     </div>
     <div className="border-t border-white/5 py-6 text-center text-xs text-zinc-600">
-      © {new Date().getFullYear()} HoneyPot Studio — our website design studio. Built in Australia.
+      © {new Date().getFullYear()} HoneyPot Studio. Educational content by Jai Butchers. Built in Australia.
     </div>
   </footer>
 );

@@ -11,18 +11,21 @@ const SECTIONS = [
     title: "What we track, and exactly why",
     body: [
       "We believe in being upfront: this site uses analytics and marketing tools. Here's the full list — nothing hidden.",
-      "Google Analytics 4 (GA4): measures page views, session duration and which pages lead to enquiries, so we know what's working.",
-      "Meta Pixel: measures whether visitors from Facebook or Instagram go on to make an enquiry, so ad spend isn't wasted.",
+      "Google Analytics 4 (GA4), when enabled with consent: measures page views, session duration and which pages lead to enquiries, so we know what's working.",
+      "Meta Pixel, when enabled with consent: measures whether visitors from Facebook or Instagram go on to make an enquiry, so ad spend isn't wasted.",
       "Google Search Console & Bing Webmaster Tools: show how the site appears in search results and flag indexing or security issues. These read search data — they don't track you on the page.",
       "Resend: delivers our transactional email (contact form notifications and confirmations). It processes the email address you give us solely to deliver that email.",
-      "First-party interaction analytics: our own lightweight counter records page views, CTA clicks, carousel interactions and form outcomes — no names, no emails, no cross-site tracking. It exists so we can see which sections of this page actually convert.",
+      "Stripe: processes website package checkout, billing details and payment status. Card details are entered on Stripe Checkout and are not stored by this website.",
+      "First-party interaction analytics: after you consent, our own lightweight counter records page views, CTA clicks, carousel interactions and form outcomes — no names, no emails, no cross-site tracking. It exists so we can see which sections of this page actually convert.",
+      "The OAIC does not ban pixels, but covert collection is likely to be unfair under APP 3. Our collection notice states what we collect and why. Confirm privacy wording with your solicitor before relying on it as legal advice.",
+      "Returning-visitor offer: this browser stores a simple previous-visit marker so it can show the optional 20% offer panel on a later visit. It is not a fingerprint and is never used to record keystrokes.",
     ],
   },
   {
     icon: Cookie,
     title: "Cookies",
     body: [
-      "GA4 and the Meta Pixel set their own cookies to distinguish visits. We don't set advertising cookies of our own, and we don't sell or share your data with data brokers. You can block cookies in your browser settings; the site works fine without them — the contact form included.",
+      "GA4 and the Meta Pixel can set cookies to distinguish visits. They are not loaded without consent. We don't set advertising cookies of our own, and we don't sell or share your data with data brokers. The site and contact form work without analytics consent.",
     ],
   },
   {
@@ -30,6 +33,7 @@ const SECTIONS = [
     title: "What we collect from the contact form",
     body: [
       "If you send us an enquiry we store your name, email, chosen service and message so we can reply. That's it. We never ask for passwords, card details or ID through this site or by email — if you ever get a message asking for those claiming to be us, it isn't us.",
+      "A previous enquirer can explicitly request one 20% offer email. The email contains no tracking pixel and includes an unsubscribe link. We do not send recurring promotional blasts through this form.",
       "Enquiries are kept only as long as needed to handle your project and meet legal obligations, then deleted on request.",
     ],
   },
@@ -55,7 +59,7 @@ const SECTIONS = [
     icon: ShieldCheck,
     title: "Your rights",
     body: [
-      "Under the Australian Privacy Act you can ask what we hold about you, ask us to correct it, or ask us to delete it. Send a note through the contact form marked 'Privacy request' and we'll action it promptly.",
+      "Under the Australian Privacy Act you can ask what we hold about you, ask us to correct it, or ask us to delete it. Email honeypotweb@proton.me or send a note through the contact form marked 'Privacy request' and we'll action it promptly.",
       "This page was last reviewed in January 2026. If we change what we track, we change this page first.",
     ],
   },

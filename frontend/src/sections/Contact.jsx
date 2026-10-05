@@ -32,6 +32,7 @@ const SERVICE_OPTIONS = [
 const Contact = () => {
   const [form, setForm] = useState({ name: "", email: "", service: "not-sure", message: "", company: "" });
   const [sending, setSending] = useState(false);
+  const [started, setStarted] = useState(false);
 
   // "Who it's for" cards preselect the matching service in this form
   useEffect(() => {
@@ -41,6 +42,12 @@ const Contact = () => {
   }, []);
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+
+  const markStarted = () => {
+    if (started) return;
+    setStarted(true);
+    track("enquiry_form_start", { source: window.location.pathname });
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -56,9 +63,10 @@ const Contact = () => {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.detail || "Something went wrong");
       }
-      track("form_submit", { service: form.service });
+      track("enquiry_form_submit", { service: form.service });
       toast.success("Enquiry sent — we'll get back to you within one business day.");
       setForm({ name: "", email: "", service: "not-sure", message: "", company: "" });
+      setStarted(false);
     } catch (err) {
       track("form_error", { reason: String(err.message).slice(0, 80) });
       toast.error(err.message === "Failed to fetch" ? "Couldn't reach the server — please try again." : err.message);
@@ -79,9 +87,13 @@ const Contact = () => {
           Four fields, one minute. No pushy sales calls — just a straight reply
           with honest pricing and a plan.
         </Reveal>
+        <Reveal delay={0.12} className="mt-5 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-zinc-400">
+          <a href="tel:+61480733936" className="transition-colors hover:text-cyan-300" data-testid="contact-phone-link">0480 733 936</a>
+          <a href="mailto:honeypotweb@proton.me" className="transition-colors hover:text-cyan-300" data-testid="contact-email-link">honeypotweb@proton.me</a>
+        </Reveal>
 
         <Reveal delay={0.15}>
-          <form onSubmit={onSubmit} className="hp-shimmer-card mt-10 space-y-5 p-8" data-testid="contact-form" noValidate={false}>
+          <form onSubmit={onSubmit} onFocus={markStarted} className="hp-shimmer-card mt-10 space-y-5 p-8" data-testid="contact-form" noValidate={false}>
             {/* honeypot — invisible to humans, bots fill it */}
             <div className="absolute left-[-9999px] top-[-9999px]" aria-hidden="true">
               <label htmlFor="company">Company</label>
@@ -171,7 +183,7 @@ const Contact = () => {
 
             <p className="text-center text-xs text-zinc-600">
               We only use your details to reply to this enquiry. See our{" "}
-              <a href="/privacy-security" className="text-zinc-400 underline underline-offset-2 hover:text-cyan-300">
+              <a href="/privacy-security" className="text-zinc-400 underline underline-offset-2 hover:text-cyan-300" data-testid="contact-privacy-link">
                 Security &amp; Privacy
               </a>{" "}
               page for exactly what we track and why.

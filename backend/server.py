@@ -15,9 +15,8 @@ import ipaddress
 import logging
 import os
 import re
-import time
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from html import escape
 from html.parser import HTMLParser
 from pathlib import Path
@@ -32,6 +31,9 @@ from pydantic import BaseModel, EmailStr, Field
 from starlette.middleware.cors import CORSMiddleware
 
 from blog_data import BLOG_POSTS
+from learn_data import LEARN_POSTS
+from payments import create_payments_router
+from offers import create_offer_router
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / ".env")
@@ -170,24 +172,36 @@ async def security_headers(request: Request, call_next):
 # ---------------------------------------------------------------------------
 # Rate limiting (in-memory sliding window, per IP)
 # ---------------------------------------------------------------------------
-_rate_store: dict = {}
-
-
-def rate_limited(key: str, limit: int, window_seconds: int) -> bool:
-    now = time.time()
-    hits = [t for t in _rate_store.get(key, []) if now - t < window_seconds]
-    if len(hits) >= limit:
-        return True
-    hits.append(now)
-    _rate_store[key] = hits
-    return False
+async def rate_limited(key: str, limit: int, window_seconds: int) -> bool:
+    now = datetime.now(timezone.utc)
+    bucket = int(now.timestamp() // window_seconds)
+    bucket_key = f"{key}:{bucket}"
+    await db.rate_limits.update_one(
+        {"key": bucket_key},
+        {
+            "$inc": {"count": 1},
+            "$setOnInsert": {
+                "expires_at": datetime.fromtimestamp(
+                    (bucket + 2) * window_seconds, timezone.utc
+                )
+            },
+        },
+        upsert=True,
+    )
+    record = await db.rate_limits.find_one(
+        {"key": bucket_key}, {"_id": 0, "count": 1}
+    )
+    return bool(record and record["count"] > limit)
 
 
 def client_ip(request: Request) -> str:
-    """Real client IP — ingress sets X-Forwarded-For; fall back to peer."""
-    fwd = request.headers.get("x-forwarded-for")
-    if fwd:
-        return fwd.split(",")[0].strip()
+    """Use the proxy-observed client hop, never the caller-controlled first hop."""
+    real_ip = request.headers.get("x-real-ip")
+    if real_ip:
+        try:
+            return str(ipaddress.ip_address(real_ip.strip()))
+        except ValueError:
+            pass
     return request.client.host if request.client else "unknown"
 
 
@@ -209,7 +223,12 @@ class ContactIn(BaseModel):
     company: str = Field(default="", max_length=200)  # honeypot — must stay empty
 
 
-ALLOWED_EVENTS = {"page_view", "cta_click", "carousel_view", "blog_open", "form_submit", "form_error"}
+ALLOWED_EVENTS = {
+    "page_view", "learn_page_view", "cta_click", "carousel_view", "blog_open",
+    "enquiry_form_start", "enquiry_form_submit", "form_submit", "form_error",
+    "enquiry_email_delivered", "enquiry_email_bounced",
+    "checkout_start", "checkout_paid", "onboarding_submit",
+}
 
 
 class AnalyticsIn(BaseModel):
@@ -231,7 +250,10 @@ async def contact(payload: ContactIn, request: Request):
     ip = client_ip(request)
     if payload.company:  # honeypot tripped — pretend success, drop silently
         return {"status": "ok"}
-    if rate_limited(f"contact:{ip}", limit=5, window_seconds=600):
+    if (
+        await rate_limited(f"contact:{ip}", limit=5, window_seconds=600)
+        or await rate_limited("contact:global", limit=100, window_seconds=600)
+    ):
         raise HTTPException(status_code=429, detail="Too many enquiries. Please try again shortly.")
     if payload.service not in ALLOWED_SERVICES:
         raise HTTPException(status_code=422, detail="Unknown service selected.")
@@ -244,6 +266,10 @@ async def contact(payload: ContactIn, request: Request):
         "service": payload.service,
         "message": payload.message,
         "created_at": now,
+        "email_delivery": {
+            "owner_notification": {"status": "pending", "message_id": None},
+            "customer_confirmation": {"status": "pending", "message_id": None},
+        },
     }
     await db.enquiries.insert_one(doc)
 
@@ -263,16 +289,27 @@ async def contact(payload: ContactIn, request: Request):
     )
     email_sent = True
     try:
-        await send_email(
+        owner_message_id = await send_email(
             to=OWNER_EMAIL,
             subject=f"New website enquiry — {service_label}",
             html=owner_html,
             reply_to=payload.email,
         )
+        await db.enquiries.update_one(
+            {"id": doc["id"]},
+            {"$set": {
+                "email_delivery.owner_notification.status": "accepted",
+                "email_delivery.owner_notification.message_id": owner_message_id,
+            }},
+        )
     except HTTPException:
         # Enquiry is safely stored in Mongo — email is best-effort so an
         # upstream rate limit never loses a lead or errors the visitor.
         email_sent = False
+        await db.enquiries.update_one(
+            {"id": doc["id"]},
+            {"$set": {"email_delivery.owner_notification.status": "failed"}},
+        )
         logger.error("Owner notification email failed for enquiry %s", doc["id"])
 
     confirm_html = (
@@ -286,12 +323,23 @@ async def contact(payload: ContactIn, request: Request):
         "</td></tr></table>"
     )
     try:
-        await send_email(
+        customer_message_id = await send_email(
             to=payload.email,
             subject="We got your enquiry — HoneyPot Studio",
             html=confirm_html,
         )
+        await db.enquiries.update_one(
+            {"id": doc["id"]},
+            {"$set": {
+                "email_delivery.customer_confirmation.status": "accepted",
+                "email_delivery.customer_confirmation.message_id": customer_message_id,
+            }},
+        )
     except HTTPException:
+        await db.enquiries.update_one(
+            {"id": doc["id"]},
+            {"$set": {"email_delivery.customer_confirmation.status": "failed"}},
+        )
         logger.warning("Confirmation email failed for enquiry %s", doc["id"])
 
     return {"status": "ok", "id": doc["id"], "email_sent": email_sent}
@@ -316,28 +364,59 @@ async def get_post(slug: str):
     return post
 
 
+@api_router.get("/learn")
+async def list_learn_posts():
+    posts = await db.learn_posts.find(
+        {}, {"_id": 0, "slug": 1, "title": 1, "heading": 1, "category": 1,
+             "excerpt": 1, "read_time": 1, "date": 1, "image": 1}
+    ).sort("date", -1).to_list(50)
+    return {"posts": posts}
+
+
+@api_router.get("/learn/{slug}")
+async def get_learn_post(slug: str):
+    if not re.fullmatch(r"[a-z0-9-]{1,80}", slug):
+        raise HTTPException(status_code=404, detail="Learn article not found")
+    post = await db.learn_posts.find_one({"slug": slug}, {"_id": 0})
+    if not post:
+        raise HTTPException(status_code=404, detail="Learn article not found")
+    return post
+
+
 @api_router.post("/analytics/event")
 async def analytics_event(payload: AnalyticsIn, request: Request):
     if payload.event not in ALLOWED_EVENTS:
         raise HTTPException(status_code=422, detail="Unknown event")
     ip = client_ip(request)
-    if rate_limited(f"analytics:{ip}", limit=120, window_seconds=60):
+    if (
+        await rate_limited(f"analytics:{ip}", limit=120, window_seconds=60)
+        or await rate_limited("analytics:global", limit=2000, window_seconds=60)
+    ):
         return {"status": "dropped"}
     await db.analytics.insert_one({
         "event": payload.event,
         "path": payload.path[:200],
         "meta": {str(k)[:40]: str(v)[:120] for k, v in list(payload.meta.items())[:8]},
         "ts": datetime.now(timezone.utc).isoformat(),
+        "expires_at": datetime.now(timezone.utc) + timedelta(days=90),
     })
     return {"status": "ok"}
 
 
 app.include_router(api_router)
+app.include_router(create_payments_router(db, send_email))
+app.include_router(create_offer_router(db, send_email, rate_limited, client_ip))
+
+cors_origins = [
+    origin.strip()
+    for origin in os.environ["PAYMENT_ALLOWED_ORIGINS"].split(",")
+    if origin.strip()
+]
 
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get("CORS_ORIGINS", "*").split(","),
+    allow_origins=cors_origins,
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
 )
@@ -347,9 +426,17 @@ app.add_middleware(
 async def seed_content():
     for post in BLOG_POSTS:
         await db.blog_posts.update_one({"slug": post["slug"]}, {"$set": post}, upsert=True)
+    for post in LEARN_POSTS:
+        await db.learn_posts.update_one({"slug": post["slug"]}, {"$set": post}, upsert=True)
     await db.analytics.create_index("ts")
     await db.enquiries.create_index("created_at")
-    logger.info("Seeded %d blog posts", len(BLOG_POSTS))
+    await db.payment_transactions.create_index("session_id", unique=True)
+    await db.onboarding_questionnaires.create_index("session_id", unique=True)
+    await db.enquiries.create_index("offer_unsubscribe_token", sparse=True)
+    await db.rate_limits.create_index("key", unique=True)
+    await db.rate_limits.create_index("expires_at", expireAfterSeconds=0)
+    await db.analytics.create_index("expires_at", expireAfterSeconds=0)
+    logger.info("Seeded %d blog posts and %d learn posts", len(BLOG_POSTS), len(LEARN_POSTS))
 
 
 @app.on_event("shutdown")

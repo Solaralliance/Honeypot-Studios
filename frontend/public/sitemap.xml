@@ -1,67 +1,109 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://honeypot.com.au/</loc>
+    <loc>https://myscapez.com/</loc>
     <lastmod>2026-10-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://honeypot.com.au/blog</loc>
+    <loc>https://myscapez.com/blog</loc>
     <lastmod>2026-10-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://honeypot.com.au/privacy-security</loc>
+    <loc>https://myscapez.com/learn</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://myscapez.com/privacy-security</loc>
     <lastmod>2026-10-05</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://honeypot.com.au/blog/what-digital-marketing-actually-includes</loc>
+    <loc>https://myscapez.com/terms</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://myscapez.com/blog/what-digital-marketing-actually-includes</loc>
     <lastmod>2026-10-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://honeypot.com.au/blog/google-ads-vs-seo-where-to-spend-first</loc>
+    <loc>https://myscapez.com/blog/google-ads-vs-seo-where-to-spend-first</loc>
     <lastmod>2026-10-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://honeypot.com.au/blog/is-social-media-management-worth-it</loc>
+    <loc>https://myscapez.com/blog/is-social-media-management-worth-it</loc>
     <lastmod>2026-10-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://honeypot.com.au/blog/content-calendar-small-business</loc>
+    <loc>https://myscapez.com/blog/content-calendar-small-business</loc>
     <lastmod>2026-10-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://honeypot.com.au/work/device-and-conquer</loc>
+    <loc>https://myscapez.com/learn/seo-geo-aeo</loc>
     <lastmod>2026-10-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://honeypot.com.au/work/areecivil-constructions</loc>
+    <loc>https://myscapez.com/learn/vercel-cloudflare</loc>
     <lastmod>2026-10-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://honeypot.com.au/work/solar-alliance</loc>
+    <loc>https://myscapez.com/learn/resend-email</loc>
     <lastmod>2026-10-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://honeypot.com.au/work/chisolson-residential</loc>
+    <loc>https://myscapez.com/learn/forms-and-owasp</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://myscapez.com/learn/analytics-consent</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://myscapez.com/work/device-and-conquer</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://myscapez.com/work/areecivil-constructions</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://myscapez.com/work/solar-alliance</loc>
+    <lastmod>2026-10-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://myscapez.com/work/chisolson-residential</loc>
     <lastmod>2026-10-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
