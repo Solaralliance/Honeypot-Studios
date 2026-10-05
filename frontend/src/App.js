@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import Home from "@/pages/Home";
 import Blog from "@/pages/Blog";
 import BlogPost from "@/pages/BlogPost";
+import CaseStudy from "@/pages/CaseStudy";
 import PrivacySecurity from "@/pages/PrivacySecurity";
 import { track } from "@/lib/analytics";
 
@@ -28,6 +29,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
+            <Route path="/work/:slug" element={<CaseStudy />} />
             <Route path="/privacy-security" element={<PrivacySecurity />} />
             <Route path="*" element={<Home />} />
           </Routes>

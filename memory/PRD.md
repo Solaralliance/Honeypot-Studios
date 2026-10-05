@@ -17,6 +17,12 @@ Marketing site for HoneyPot website design studio: live website showcase carouse
 - Scripts: /app/scripts/secret_scan.py (pre-commit/deploy secret gate), /app/scripts/lint_check.py (py_compile + flake8 E9/F + eslint flat config)
 - SEO: index.html meta/OG/Twitter/JSON-LD + per-page Helmet; favicon.svg/ico/apple-touch-icon + site.webmanifest
 
+## Implemented (2026-10-05, update 3)
+- Case study pages at /work/:slug for all 4 projects: overview, challenge, what-we-built, stack chips, results grid, testimonial block, related projects, CaseStudy JSON-LD. Results/quotes are HONEST placeholder slots ("—" + visible disclaimer, quote card says "coming soon") — no fabricated testimonials; owner to supply real figures/quotes
+- Carousel cards now link "Full case study" + "Live preview"
+- scripts/build_sitemap.py generates public/sitemap.xml from real content sources (blog_data.py slugs + portfolio.js ids) — 11 URLs; public/robots.txt points to it; both serve 200 (application/xml)
+- STILL PENDING FROM USER: real business email for OWNER_EMAIL (currently test sink delivered@resend.dev), GA4 Measurement ID, Meta Pixel ID, real results + client quotes per project
+
 ## Implemented (2026-10-05, update 2)
 - Navbar Services dropdown: 7 icon-button entries (landing, tradie, custom, CRMs & web apps, digital marketing, social media, hosting) with prices, glass panel; mobile menu mirrors it
 - Working sitemap: nav + footer links point to real anchors (#who, #services, #build-types, #pricing, #extras, #work, #contact) with scroll-mt for fixed header

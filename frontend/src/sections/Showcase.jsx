@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination, Keyboard, A11y, EffectCoverflow } from "swiper/modules";
 import { ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
@@ -97,17 +98,27 @@ const Showcase = () => {
                           {tag}
                         </span>
                       ))}
-                      {project.url && (
-                        <a
-                          href={project.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="ml-auto inline-flex items-center gap-1.5 text-xs font-semibold text-fuchsia-400 transition-colors hover:text-cyan-300"
-                          data-testid={`showcase-visit-${project.id}`}
+                      <span className="ml-auto flex items-center gap-4">
+                        <Link
+                          to={`/work/${project.id}`}
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-300 transition-colors hover:text-white"
+                          data-testid={`showcase-case-study-${project.id}`}
+                          onClick={() => track("cta_click", { label: `case-study-${project.id}` })}
                         >
-                          Live website preview <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-                        </a>
-                      )}
+                          Full case study
+                        </Link>
+                        {project.url && (
+                          <a
+                            href={project.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-fuchsia-400 transition-colors hover:text-cyan-300"
+                            data-testid={`showcase-visit-${project.id}`}
+                          >
+                            Live preview <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                          </a>
+                        )}
+                      </span>
                     </div>
                   </div>
                 </article>
