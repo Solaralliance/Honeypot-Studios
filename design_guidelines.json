@@ -1,0 +1,161 @@
+{
+  "theme": "dark",
+  "app_type": "landing_page",
+  "typography": {
+    "font_families": {
+      "headings": "'Unbounded', sans-serif",
+      "body": "'IBM Plex Sans', sans-serif"
+    },
+    "scale": {
+      "h1": "text-5xl sm:text-6xl tracking-tighter font-black",
+      "h2": "text-3xl sm:text-4xl tracking-tight font-bold",
+      "h3": "text-2xl sm:text-3xl tracking-tight font-bold",
+      "body": "text-base leading-relaxed text-gray-300",
+      "small": "text-sm uppercase tracking-[0.2em] font-medium"
+    },
+    "links": [
+      "https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+    ]
+  },
+  "colors": {
+    "archetype": "ARCHETYPE 7: ELECTRIC & NEON",
+    "background": {
+      "default": "#050505",
+      "card": "#0A0A0A",
+      "glass": "rgba(10, 10, 10, 0.6)"
+    },
+    "text": {
+      "primary": "#FFFFFF",
+      "secondary": "#A1A1AA",
+      "accent": "#FF00FF"
+    },
+    "brand": {
+      "primary": "#FF00FF",
+      "secondary": "#00FFFF",
+      "tertiary": "#8A2BE2"
+    },
+    "gradients": {
+      "text": "bg-gradient-to-r from-fuchsia-500 via-purple-500 to-cyan-500 bg-clip-text text-transparent",
+      "border_glow": "bg-gradient-to-r from-fuchsia-500 via-purple-500 to-cyan-500",
+      "glow_ambient": "bg-gradient-to-tr from-fuchsia-500/20 via-purple-500/20 to-cyan-500/20"
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": "backdrop-blur-xl bg-black/60 border border-white/10",
+    "tracing_beam": "Animated gradient border that travels around the container edge, specifically for CTA buttons.",
+    "shimmer_card": "Cards with stationary shimmer glow border on hover using Framer Motion.",
+    "textures": "Subtle noise overlay (opacity-5) to prevent pure digital flatness. SVG hexagon patterns.",
+    "shadows": {
+      "neon_pink": "drop-shadow-[0_0_15px_rgba(255,0,255,0.5)]",
+      "neon_cyan": "drop-shadow-[0_0_15px_rgba(0,255,255,0.5)]"
+    }
+  },
+  "components": [
+    {
+      "name": "NeonCTAButton",
+      "description": "Pill-shaped button with a border that loops around and shines/glows, and speeds up upon being hovered.",
+      "library": "framer-motion + tailwind"
+    },
+    {
+      "name": "ShimmerCard",
+      "description": "Card with a shiny glow border that stays in one place and shimmers/glows when hovered over.",
+      "library": "framer-motion + tailwind"
+    },
+    {
+      "name": "AnimatedCounter",
+      "description": "Stat counter starting at 0 and reaching 200+ to indicate websites built.",
+      "library": "framer-motion (useSpring) or react-countup"
+    },
+    {
+      "name": "WebsiteShowcaseCarousel",
+      "description": "Live website showcase carousel featuring different projects built. Must be highly interactive.",
+      "library": "swiper"
+    }
+  ],
+  "grids_and_layouts": {
+    "spacing_philosophy": "Generous spacing. Use p-8 to p-16 for containers. Deep padding inside cards.",
+    "sections": [
+      {
+        "name": "Hero",
+        "layout": "Centered flex layout, massive H1 ('WE BUILD WEBSITES THAT WORK') with text gradient. Neon CTA. Background features floating SVGs (hexagons) or tsparticles.",
+        "behavior": "Scroll-triggered entrance animations."
+      },
+      {
+        "name": "StatsBar",
+        "layout": "Grid cols-1 md:cols-3. Centered content highlighting '200+ Websites Built' with AnimatedCounter."
+      },
+      {
+        "name": "Services_Bento",
+        "layout": "Bento Grid (grid-cols-1 md:grid-cols-12, gap-8). Cards span different columns. 5 services (Landing Pages, Tradie Sites, Custom Builds, Digital Marketing, Social Media). Include pricing.",
+        "behavior": "Hover shimmer cards."
+      },
+      {
+        "name": "Portfolio_Carousel",
+        "layout": "Full width Swiper carousel showcasing website mockups."
+      },
+      {
+        "name": "Blog_Preview",
+        "layout": "Grid cols-1 md:grid-cols-2 gap-8 for Digital Marketing & Social Media blog cards."
+      },
+      {
+        "name": "Contact_Form",
+        "layout": "Simple, clean form at bottom. Shadcn Form components. Not annoying, high contrast inputs.",
+        "behavior": "Form submission should trigger a Sonner toast."
+      },
+      {
+        "name": "Security_Privacy_Page",
+        "layout": "Separate route or modal. Clean typography-focused layout explaining GA4, Meta Pixel, tracking, etc."
+      }
+    ]
+  },
+  "motion_and_interactions": {
+    "scroll_reveal": "All headings must drop down when user scrolls to them (whileInView, y: -20 to 0, opacity 0 to 1).",
+    "hover_states": "Buttons speed up looping gradient. Cards glow heavily on hover.",
+    "page_transitions": "Smooth fade-in for page loads.",
+    "accessibility": "Respect prefers-reduced-motion for heavy animations."
+  },
+  "image_urls": {
+    "logo": {
+      "url": "https://customer-assets-eiarnc6j.emergentagent.net/job_8a876f68-14ba-49e3-84f0-dfe2beb700a7/artifacts/dm7w1hq2_22101766-41AF-479A-B542-D065C2D735C6.webp",
+      "category": "header, footer",
+      "description": "HoneyPot logo - dissolving hexagonal particles"
+    },
+    "hero_mockup": {
+      "url": "https://customer-assets-eiarnc6j.emergentagent.net/job_8a876f68-14ba-49e3-84f0-dfe2beb700a7/artifacts/ns4ihd3m_IMG_3229.jpeg",
+      "category": "hero_background_reference, general_vibe",
+      "description": "User provided mockup for visual identity"
+    },
+    "abstract_background": {
+      "url": "https://images.unsplash.com/photo-1773429492643-62efd2686348?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTJ8MHwxfHNlYXJjaHwzfHxuZW9uJTIwYWJzdHJhY3QlMjBoZXhhZ29ufGVufDB8fHx8MTc5MTE2NjgwMnww&ixlib=rb-4.1.0&q=85",
+      "category": "section_background",
+      "description": "Abstract purple geometric hexagon pattern"
+    },
+    "portfolio_item_1": {
+      "url": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDF8MHwxfHNlYXJjaHwxfHx3ZWJzaXRlJTIwZGFzaGJvYXJkJTIwZGFya3xlbnwwfHx8fDE3OTExNjY4MDZ8MA&ixlib=rb-4.1.0&q=85",
+      "category": "carousel",
+      "description": "Website dashboard analytics screen for showcase"
+    },
+    "blog_digital_marketing": {
+      "url": "https://images.unsplash.com/photo-1571677246347-5040036b95cc?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTB8MHwxfHNlYXJjaHwyfHxkaWdpdGFsJTIwbWFya2V0aW5nJTIwYW5hbHl0aWNzfGVufDB8fHx8MTc5MTE2NjgxMXww&ixlib=rb-4.1.0&q=85",
+      "category": "blog_cards",
+      "description": "Laptop in dark red neon environment for Digital Marketing/Social Media blog"
+    }
+  },
+  "libraries_and_tools": [
+    "framer-motion (for scroll reveals, looping glow borders)",
+    "swiper (for live website carousel)",
+    "lucide-react (icons)",
+    "sonner (toasts)",
+    "react-countup (for 200+ stat)"
+  ],
+  "accessibility": {
+    "contrast": "Ensure pink/cyan on black meets APCA/WCAG ratios.",
+    "testing": "All interactive elements MUST include data-testid."
+  },
+  "content_guardrails": {
+    "copy": "Be brutally honest about services. Keep form simple. Explicitly mention tracking (GA4, Meta Pixel, Resend) in Privacy page.",
+    "seo": "Apply robust metadata, Alt tags for images.",
+    "pricing": "Landing page from $499, Tradie site from $999, Custom from $2,499. Price marketing/social media competitively."
+  },
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": "1. MUST strictly follow dark theme with neon accents. No light theme mode. 2. Do not use generic gradient slop; use crisp glowing borders and layered shadows. 3. No centered layouts for dense text. 4. ALL headings must reveal on scroll. 5. Buttons must have looping animated glow borders. 6. Add a security and privacy page explicitly mentioning GA4, Meta, Bing tracking. 7. Do NOT use completely transparent backgrounds for overlapping elements; use glassmorphism with blur. 8. Ensure testing data-testid attributes are present everywhere."
+}

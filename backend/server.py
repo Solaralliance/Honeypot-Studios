@@ -1,0 +1,357 @@
+"""HoneyPot Studio — FastAPI backend.
+
+Endpoints:
+  POST /api/contact           Contact form (rate-limited, honeypot, emails owner via Resend proxy)
+  GET  /api/posts             Blog post summaries
+  GET  /api/posts/{slug}      Full blog post
+  POST /api/analytics/event   First-party interaction analytics (no PII)
+  GET  /api/health            Health check
+
+Security: OWASP-aligned headers, input validation, per-IP rate limiting,
+server-side email templates with HTML escaping (no caller-controlled
+recipients/subjects/bodies), secrets only from environment.
+"""
+import ipaddress
+import logging
+import os
+import re
+import time
+import uuid
+from datetime import datetime, timezone
+from html import escape
+from html.parser import HTMLParser
+from pathlib import Path
+from typing import Optional
+from urllib.parse import urlparse
+
+import httpx
+from dotenv import load_dotenv
+from fastapi import FastAPI, APIRouter, HTTPException, Request
+from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import BaseModel, EmailStr, Field
+from starlette.middleware.cors import CORSMiddleware
+
+from blog_data import BLOG_POSTS
+
+ROOT_DIR = Path(__file__).parent
+load_dotenv(ROOT_DIR / ".env")
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Database
+# ---------------------------------------------------------------------------
+mongo_url = os.environ["MONGO_URL"]
+client = AsyncIOMotorClient(mongo_url)
+db = client[os.environ["DB_NAME"]]
+
+# ---------------------------------------------------------------------------
+# Email (Emergent managed Resend proxy)
+# ---------------------------------------------------------------------------
+EMAIL_BASE_URL = "https://integrations.emergentagent.com"  # constant, not env
+EMAIL_KEY = os.environ["EMERGENT_EMAIL_KEY"]
+EMAIL_FROM_NAME = os.environ["EMAIL_FROM_NAME"]
+OWNER_EMAIL = os.environ["OWNER_EMAIL"]
+
+_SHORTENERS = ("bit.ly", "tinyurl.com", "t.co", "is.gd", "cutt.ly", "goo.gl", "rebrand.ly")
+_CRED_ASK = ("reply with your password", "reply with the code", "send your password", "cvv",
+             "send us your password", "enter your password below", "confirm your card number",
+             "your full card number", "seed phrase", "recovery phrase", "verify your card",
+             "social security number", "confirm your bank details")
+_HOSTISH = re.compile(r"\b(?:https?://)?((?:[a-z0-9-]+\.)+[a-z]{2,})", re.I)
+
+
+def _host_ok(host: str) -> bool:
+    if not host or "xn--" in host:
+        return False
+    try:
+        ipaddress.ip_address(host)
+        return False
+    except ValueError:
+        pass
+    return not any(host == s or host.endswith("." + s) for s in _SHORTENERS)
+
+
+def _same_site(shown: str, real: str) -> bool:
+    return shown == real or real.endswith("." + shown) or shown.endswith("." + real)
+
+
+class _EmailScan(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.tags, self.urls, self.anchors = set(), [], []
+        self._href, self._text = None, []
+
+    def handle_starttag(self, tag, attrs):
+        self.tags.add(tag.lower())
+        self.urls += [v for k, v in attrs if k.lower() in ("href", "src") and v]
+        if tag.lower() == "a":
+            self._href = dict((k.lower(), v) for k, v in attrs).get("href")
+            self._text = []
+
+    def handle_data(self, data):
+        if self._href is not None:
+            self._text.append(data)
+
+    def handle_endtag(self, tag):
+        if tag.lower() == "a" and self._href is not None:
+            self.anchors.append((self._href, "".join(self._text)))
+            self._href, self._text = None, []
+
+
+def _assert_safe_email(subject: str, html: str) -> None:
+    scan = _EmailScan()
+    scan.feed(html)
+    if scan.tags & {"form", "input", "textarea", "select"}:
+        raise ValueError("No forms or input fields in email (G2)")
+    body = f"{subject}\n{html}".lower()
+    for p in _CRED_ASK:
+        if p in body:
+            raise ValueError(f"Email asks the recipient for credentials: {p!r} (G2)")
+    for url in scan.urls:
+        low = url.strip().lower()
+        if low.startswith(("mailto:", "tel:", "cid:", "#")):
+            continue
+        if not low.startswith("https://"):
+            raise ValueError(f"Email links/assets must be absolute https: {url!r} (G3)")
+        host = urlparse(low).hostname or ""
+        if not _host_ok(host) or urlparse(low).username is not None:
+            raise ValueError(f"Shortened, numeric-host or credential-bearing URL: {url!r} (G3)")
+    for href, text in scan.anchors:
+        real = urlparse(href.strip().lower()).hostname or ""
+        if not real:
+            continue
+        for m in _HOSTISH.finditer(text):
+            if not _same_site(m.group(1).lower(), real):
+                raise ValueError(f"Anchor text {m.group(1)!r} != real link host {real!r} (G3)")
+
+
+async def send_email(*, to: str, subject: str, html: str, reply_to: Optional[str] = None) -> Optional[str]:
+    _assert_safe_email(subject, html)
+    payload = {"to": [to], "subject": subject, "html": html, "from_name": EMAIL_FROM_NAME}
+    if reply_to:
+        payload["contact_email"] = reply_to
+    try:
+        async with httpx.AsyncClient(timeout=30) as http:
+            resp = await http.post(
+                f"{EMAIL_BASE_URL}/api/v1/email/send",
+                headers={"X-Email-Key": EMAIL_KEY},
+                json=payload,
+            )
+        resp.raise_for_status()
+        return resp.json().get("id")
+    except Exception as e:  # noqa: BLE001 - log and surface as 502
+        logger.error("Email send error: %s", str(e))
+        raise HTTPException(status_code=502, detail="Failed to send email")
+
+
+# ---------------------------------------------------------------------------
+# App + middleware
+# ---------------------------------------------------------------------------
+app = FastAPI(title="HoneyPot Studio API", docs_url=None, redoc_url=None, openapi_url=None)
+api_router = APIRouter(prefix="/api")
+
+
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    resp = await call_next(request)
+    resp.headers["X-Content-Type-Options"] = "nosniff"
+    resp.headers["X-Frame-Options"] = "DENY"
+    resp.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    resp.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    resp.headers["Cache-Control"] = "no-store" if request.url.path.startswith("/api") else "public"
+    return resp
+
+
+# ---------------------------------------------------------------------------
+# Rate limiting (in-memory sliding window, per IP)
+# ---------------------------------------------------------------------------
+_rate_store: dict = {}
+
+
+def rate_limited(key: str, limit: int, window_seconds: int) -> bool:
+    now = time.time()
+    hits = [t for t in _rate_store.get(key, []) if now - t < window_seconds]
+    if len(hits) >= limit:
+        return True
+    hits.append(now)
+    _rate_store[key] = hits
+    return False
+
+
+def client_ip(request: Request) -> str:
+    """Real client IP — ingress sets X-Forwarded-For; fall back to peer."""
+    fwd = request.headers.get("x-forwarded-for")
+    if fwd:
+        return fwd.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
+# ---------------------------------------------------------------------------
+# Models
+# ---------------------------------------------------------------------------
+ALLOWED_SERVICES = {
+    "landing-page", "tradie-website", "custom-website", "crm-web-app",
+    "website-revamp", "digital-marketing", "social-media", "website-hosting",
+    "not-sure",
+}
+
+
+class ContactIn(BaseModel):
+    name: str = Field(min_length=2, max_length=80)
+    email: EmailStr
+    service: str = Field(default="not-sure", max_length=40)
+    message: str = Field(min_length=10, max_length=2000)
+    company: str = Field(default="", max_length=200)  # honeypot — must stay empty
+
+
+ALLOWED_EVENTS = {"page_view", "cta_click", "carousel_view", "blog_open", "form_submit", "form_error"}
+
+
+class AnalyticsIn(BaseModel):
+    event: str = Field(max_length=40)
+    path: str = Field(default="/", max_length=200)
+    meta: dict = Field(default_factory=dict)
+
+
+# ---------------------------------------------------------------------------
+# Routes
+# ---------------------------------------------------------------------------
+@api_router.get("/health")
+async def health():
+    return {"status": "ok", "service": "honeypot-studio"}
+
+
+@api_router.post("/contact")
+async def contact(payload: ContactIn, request: Request):
+    ip = client_ip(request)
+    if payload.company:  # honeypot tripped — pretend success, drop silently
+        return {"status": "ok"}
+    if rate_limited(f"contact:{ip}", limit=5, window_seconds=600):
+        raise HTTPException(status_code=429, detail="Too many enquiries. Please try again shortly.")
+    if payload.service not in ALLOWED_SERVICES:
+        raise HTTPException(status_code=422, detail="Unknown service selected.")
+
+    now = datetime.now(timezone.utc).isoformat()
+    doc = {
+        "id": str(uuid.uuid4()),
+        "name": payload.name,
+        "email": payload.email,
+        "service": payload.service,
+        "message": payload.message,
+        "created_at": now,
+    }
+    await db.enquiries.insert_one(doc)
+
+    service_label = payload.service.replace("-", " ").title()
+    owner_html = (
+        '<table role="presentation" width="100%"><tr><td style="padding:24px;'
+        'font-family:Arial,sans-serif;color:#111">'
+        f"<h2 style='margin:0 0 12px'>New enquiry — {escape(service_label)}</h2>"
+        f"<p><strong>Name:</strong> {escape(payload.name)}<br>"
+        f"<strong>Email:</strong> {escape(payload.email)}<br>"
+        f"<strong>Service:</strong> {escape(service_label)}</p>"
+        f"<p style='white-space:pre-wrap;background:#f5f5f5;padding:12px;border-radius:8px'>"
+        f"{escape(payload.message)}</p>"
+        f"<p style='font-size:12px;color:#888'>Sent by {escape(EMAIL_FROM_NAME)} website contact form. "
+        "We never ask for passwords or card details by email.</p>"
+        "</td></tr></table>"
+    )
+    email_sent = True
+    try:
+        await send_email(
+            to=OWNER_EMAIL,
+            subject=f"New website enquiry — {service_label}",
+            html=owner_html,
+            reply_to=payload.email,
+        )
+    except HTTPException:
+        # Enquiry is safely stored in Mongo — email is best-effort so an
+        # upstream rate limit never loses a lead or errors the visitor.
+        email_sent = False
+        logger.error("Owner notification email failed for enquiry %s", doc["id"])
+
+    confirm_html = (
+        '<table role="presentation" width="100%"><tr><td style="padding:24px;'
+        'font-family:Arial,sans-serif;color:#111">'
+        f"<p>Hi {escape(payload.name.split()[0])},</p>"
+        "<p>Thanks for reaching out to HoneyPot Studio — your enquiry has landed "
+        "in our inbox and we will get back to you within one business day.</p>"
+        f"<p style='font-size:12px;color:#888'>Sent by {escape(EMAIL_FROM_NAME)}. "
+        "We never ask for passwords or card details by email.</p>"
+        "</td></tr></table>"
+    )
+    try:
+        await send_email(
+            to=payload.email,
+            subject="We got your enquiry — HoneyPot Studio",
+            html=confirm_html,
+        )
+    except HTTPException:
+        logger.warning("Confirmation email failed for enquiry %s", doc["id"])
+
+    return {"status": "ok", "id": doc["id"], "email_sent": email_sent}
+
+
+@api_router.get("/posts")
+async def list_posts():
+    posts = await db.blog_posts.find(
+        {}, {"_id": 0, "slug": 1, "title": 1, "category": 1, "excerpt": 1,
+             "read_time": 1, "date": 1, "image": 1}
+    ).sort("date", -1).to_list(50)
+    return {"posts": posts}
+
+
+@api_router.get("/posts/{slug}")
+async def get_post(slug: str):
+    if not re.fullmatch(r"[a-z0-9-]{1,80}", slug):
+        raise HTTPException(status_code=404, detail="Post not found")
+    post = await db.blog_posts.find_one({"slug": slug}, {"_id": 0})
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return post
+
+
+@api_router.post("/analytics/event")
+async def analytics_event(payload: AnalyticsIn, request: Request):
+    if payload.event not in ALLOWED_EVENTS:
+        raise HTTPException(status_code=422, detail="Unknown event")
+    ip = client_ip(request)
+    if rate_limited(f"analytics:{ip}", limit=120, window_seconds=60):
+        return {"status": "dropped"}
+    await db.analytics.insert_one({
+        "event": payload.event,
+        "path": payload.path[:200],
+        "meta": {str(k)[:40]: str(v)[:120] for k, v in list(payload.meta.items())[:8]},
+        "ts": datetime.now(timezone.utc).isoformat(),
+    })
+    return {"status": "ok"}
+
+
+app.include_router(api_router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=os.environ.get("CORS_ORIGINS", "*").split(","),
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
+)
+
+
+@app.on_event("startup")
+async def seed_content():
+    for post in BLOG_POSTS:
+        await db.blog_posts.update_one({"slug": post["slug"]}, {"$set": post}, upsert=True)
+    await db.analytics.create_index("ts")
+    await db.enquiries.create_index("created_at")
+    logger.info("Seeded %d blog posts", len(BLOG_POSTS))
+
+
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    client.close()

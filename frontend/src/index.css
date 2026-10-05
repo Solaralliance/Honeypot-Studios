@@ -1,0 +1,287 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --background: 0 0% 2%;
+        --foreground: 0 0% 100%;
+        --card: 0 0% 4%;
+        --card-foreground: 0 0% 98%;
+        --popover: 0 0% 4%;
+        --popover-foreground: 0 0% 98%;
+        --primary: 300 100% 50%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 0 0% 10%;
+        --secondary-foreground: 0 0% 98%;
+        --muted: 0 0% 10%;
+        --muted-foreground: 240 5% 64.9%;
+        --accent: 180 100% 50%;
+        --accent-foreground: 0 0% 2%;
+        --destructive: 0 84.2% 60.2%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 0 0% 14.9%;
+        --input: 0 0% 18%;
+        --ring: 300 100% 50%;
+        --radius: 0.75rem;
+        --hp-pink: #ff00ff;
+        --hp-cyan: #00ffff;
+        --hp-violet: #8a2be2;
+    }
+
+    * {
+        @apply border-border;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+        font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    h1, h2, h3, h4, .font-display {
+        font-family: "Unbounded", "IBM Plex Sans", sans-serif;
+    }
+
+    ::selection {
+        background: rgba(255, 0, 255, 0.35);
+        color: #fff;
+    }
+
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #050505;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #ff00ff, #8a2be2, #00ffff);
+        border-radius: 8px;
+    }
+}
+
+@layer base {
+    [data-debug-wrapper="true"] {
+        display: contents !important;
+    }
+    [data-debug-wrapper="true"] > * {
+        margin-left: inherit;
+        margin-right: inherit;
+        margin-top: inherit;
+        margin-bottom: inherit;
+        padding-left: inherit;
+        padding-right: inherit;
+        padding-top: inherit;
+        padding-bottom: inherit;
+        column-gap: inherit;
+        row-gap: inherit;
+        gap: inherit;
+        border-left-width: inherit;
+        border-right-width: inherit;
+        border-top-width: inherit;
+        border-bottom-width: inherit;
+        border-left-style: inherit;
+        border-right-style: inherit;
+        border-top-style: inherit;
+        border-bottom-style: inherit;
+        border-left-color: inherit;
+        border-right-color: inherit;
+        border-top-color: inherit;
+        border-bottom-color: inherit;
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* HoneyPot neon system                                                */
+/* ------------------------------------------------------------------ */
+
+@property --hp-angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+}
+
+/* CTA button: looping gradient border that speeds up on hover */
+.hp-neon-btn {
+    position: relative;
+    border-radius: 9999px;
+    padding: 2px;
+    background: conic-gradient(
+        from var(--hp-angle),
+        #ff00ff,
+        #8a2be2,
+        #00ffff,
+        #8a2be2,
+        #ff00ff
+    );
+    animation: hp-border-spin 3.2s linear infinite;
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 0 12px rgba(255, 0, 255, 0.25), 0 0 24px rgba(0, 255, 255, 0.12);
+}
+
+.hp-neon-btn:hover,
+.hp-neon-btn:focus-visible {
+    animation-duration: 0.7s;
+    box-shadow: 0 0 22px rgba(255, 0, 255, 0.55), 0 0 44px rgba(0, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.hp-neon-btn:active {
+    transform: translateY(0);
+}
+
+@keyframes hp-border-spin {
+    to {
+        --hp-angle: 360deg;
+    }
+}
+
+/* Shimmer card: stationary glow border + shine sweep on hover */
+.hp-shimmer-card {
+    position: relative;
+    border-radius: 1rem;
+    background: #0a0a0a;
+    overflow: hidden;
+    transition: box-shadow 0.4s ease, transform 0.3s ease;
+}
+
+.hp-shimmer-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(255, 0, 255, 0.55), rgba(138, 43, 226, 0.35), rgba(0, 255, 255, 0.55));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+.hp-shimmer-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+        115deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.85) 48%,
+        rgba(0, 255, 255, 0.7) 52%,
+        transparent 70%
+    );
+    background-size: 250% 250%;
+    background-position: 120% 0;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.hp-shimmer-card:hover,
+.hp-shimmer-card:focus-within {
+    box-shadow: 0 0 28px rgba(255, 0, 255, 0.28), 0 0 56px rgba(0, 255, 255, 0.14);
+    transform: translateY(-4px);
+}
+
+.hp-shimmer-card:hover::after,
+.hp-shimmer-card:focus-within::after {
+    opacity: 1;
+    animation: hp-shine-sweep 1.1s ease-in-out infinite;
+}
+
+@keyframes hp-shine-sweep {
+    0% {
+        background-position: 120% 0;
+    }
+    100% {
+        background-position: -120% 0;
+    }
+}
+
+/* Ambient helpers */
+.hp-gradient-text {
+    @apply bg-gradient-to-r from-fuchsia-500 via-purple-500 to-cyan-400 bg-clip-text text-transparent;
+    /* taller line box so Unbounded's glyphs never clip vertically;
+       clone keeps the gradient correct when the span wraps across lines.
+       NOTE: no padding/negative margins here — they cause horizontal
+       glyph clipping with bg-clip:text in Chromium (verified). */
+    line-height: 1.25;
+    padding: 0.08em 0.25em;
+    margin: -0.08em -0.25em;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+}
+
+.hp-glow-text {
+    text-shadow: 0 0 28px rgba(255, 0, 255, 0.35), 0 0 60px rgba(0, 255, 255, 0.2);
+}
+
+.hp-glass {
+    background: rgba(10, 10, 10, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hp-noise::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.hp-hex-grid {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath d='M28 66 0 50V16l28-16 28 16v34zM28 100l28-16V50L28 34 0 50v34z' fill='none' stroke='rgba(138,43,226,0.14)' stroke-width='1'/%3E%3C/svg%3E");
+    background-size: 56px 100px;
+}
+
+@keyframes hp-float {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-16px) rotate(4deg);
+    }
+}
+
+.hp-float {
+    animation: hp-float 7s ease-in-out infinite;
+}
+
+.hp-float-slow {
+    animation: hp-float 11s ease-in-out infinite;
+}
+
+/* Swiper theme overrides */
+.swiper-pagination-bullet {
+    background: #3f3f46;
+    opacity: 1;
+}
+.swiper-pagination-bullet-active {
+    background: linear-gradient(90deg, #ff00ff, #00ffff);
+    width: 24px;
+    border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hp-neon-btn,
+    .hp-float,
+    .hp-float-slow,
+    .hp-shimmer-card:hover::after {
+        animation: none !important;
+    }
+    html {
+        scroll-behavior: auto;
+    }
+}

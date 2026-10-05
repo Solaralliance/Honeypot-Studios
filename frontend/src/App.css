@@ -1,0 +1,6 @@
+/* HoneyPot Studio — component-level overrides (theme lives in index.css) */
+
+.App {
+    min-height: 100vh;
+    background: #050505;
+}

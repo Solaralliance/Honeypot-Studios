@@ -1,0 +1,105 @@
+"""Seed blog content for HoneyPot Studio.
+
+Each post carries full image metadata (alt text, dimensions, credit) so the
+frontend can render accessible, SEO-friendly figures.
+"""
+
+BLOG_POSTS = [
+    {
+        "slug": "what-digital-marketing-actually-includes",
+        "title": "What Digital Marketing Actually Includes (No Jargon)",
+        "category": "Digital Marketing",
+        "excerpt": "SEO, Google Ads, email, analytics — digital marketing gets sold as magic. It isn't. Here's what each piece does and when it's worth paying for.",
+        "read_time": 4,
+        "date": "2026-01-12",
+        "image": {
+            "url": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
+            "alt": "Laptop showing marketing analytics dashboard with growth charts and graphs",
+            "width": 1200,
+            "height": 800,
+            "credit": "Unsplash",
+        },
+        "content": [
+            {"type": "p", "text": "Digital marketing is an umbrella term that gets used to sell confusing packages. Stripped back, it's four things: being found (SEO), paying to be found (ads), staying in touch (email), and measuring all of it (analytics)."},
+            {"type": "h2", "text": "SEO — the slow asset"},
+            {"type": "p", "text": "Search engine optimisation is making your site easy for Google to understand and worth showing. It compounds: a page that ranks keeps bringing enquiries without you paying per click. The trade-off is time — expect months, not days."},
+            {"type": "h2", "text": "Paid ads — the fast tap"},
+            {"type": "p", "text": "Google Ads puts you at the top of search results today. You pay per click, and when you stop paying, you disappear. It's the right tool for a new site with no rankings yet, or a seasonal push."},
+            {"type": "h2", "text": "Analytics — the part everyone skips"},
+            {"type": "p", "text": "If you don't know which channel brought the enquiry, you're guessing. We set up GA4 and conversion tracking on every marketing engagement so decisions come from data, not vibes."},
+            {"type": "p", "text": "Our honest take: most small businesses should start with a fast website, basic SEO and one well-run ad campaign — not a bundle of everything at once."},
+        ],
+    },
+    {
+        "slug": "google-ads-vs-seo-where-to-spend-first",
+        "title": "Google Ads vs SEO: Where Should a Small Business Spend First?",
+        "category": "Digital Marketing",
+        "excerpt": "Both put you in front of people searching. One is a tap you pay to keep running, the other is an asset you build. Here's how to choose.",
+        "read_time": 5,
+        "date": "2026-01-05",
+        "image": {
+            "url": "https://images.unsplash.com/photo-1533750349088-cd871a92f312?auto=format&fit=crop&w=1200&q=80",
+            "alt": "Desk flat lay with marketing books and a handwritten marketing strategy note",
+            "width": 1200,
+            "height": 800,
+            "credit": "Unsplash",
+        },
+        "content": [
+            {"type": "p", "text": "This is the most common question we get after launching a site. The honest answer: it depends on how fast you need the phone to ring."},
+            {"type": "h2", "text": "Choose ads first if…"},
+            {"type": "p", "text": "You need enquiries this month. A new website has no authority with Google, so SEO alone won't deliver quickly. A tight Google Ads campaign on your highest-value keywords fills the gap while rankings build."},
+            {"type": "h2", "text": "Choose SEO first if…"},
+            {"type": "p", "text": "You're playing a longer game and your margins are thin. SEO work — proper page structure, local keywords, Google Business Profile, reviews — keeps paying off after the invoice is settled."},
+            {"type": "h2", "text": "What we usually recommend"},
+            {"type": "p", "text": "Both, weighted. A modest ad budget for immediate leads, with steady SEO work underneath. Over 6–12 months the organic traffic grows and the ad budget can shrink. Anyone promising page one in a week is selling you something."},
+        ],
+    },
+    {
+        "slug": "is-social-media-management-worth-it",
+        "title": "Is Paying for Social Media Management Actually Worth It?",
+        "category": "Social Media",
+        "excerpt": "For some businesses it's the best money they spend. For others it's a bonfire. A straight answer on when outsourcing your socials makes sense.",
+        "read_time": 4,
+        "date": "2025-12-28",
+        "image": {
+            "url": "https://images.unsplash.com/photo-1611926653458-09294b3142bf?auto=format&fit=crop&w=1200&q=80",
+            "alt": "Hand holding a smartphone displaying social media app icons on screen",
+            "width": 1200,
+            "height": 800,
+            "credit": "Unsplash",
+        },
+        "content": [
+            {"type": "p", "text": "We'll be brutally honest, because it's our job: social media management is not for everyone."},
+            {"type": "h2", "text": "When it's worth it"},
+            {"type": "p", "text": "If your customers check your socials before they call — hospitality, beauty, fitness, retail — a dead profile costs you real work. Consistent posting, replies within hours and local targeting turn a profile into a shopfront."},
+            {"type": "h2", "text": "When it isn't"},
+            {"type": "p", "text": "If your work comes from referrals and Google search (many tradies, B2B services), twelve posts a month won't move the needle. A clean profile updated monthly is enough — spend the rest on your website and reviews."},
+            {"type": "h2", "text": "What good management includes"},
+            {"type": "p", "text": "A content calendar, photography or graphics, caption writing, scheduling, comment replies and a monthly report you can actually read. If an agency can't show you what's working, they're posting for the sake of posting."},
+        ],
+    },
+    {
+        "slug": "content-calendar-small-business",
+        "title": "A Realistic Content Calendar for a Busy Small Business",
+        "category": "Social Media",
+        "excerpt": "You don't need to post every day. You need a plan you can actually keep. Here's the weekly rhythm we set up for clients.",
+        "read_time": 4,
+        "date": "2025-12-15",
+        "image": {
+            "url": "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1200&q=80",
+            "alt": "Flat lay of a smartphone, notebook and coffee planning a social media content calendar",
+            "width": 1200,
+            "height": 800,
+            "credit": "Unsplash",
+        },
+        "content": [
+            {"type": "p", "text": "Most content calendars fail because they're built for a full-time marketing team, not a business owner with a job to do. Consistency beats volume every time."},
+            {"type": "h2", "text": "The three-post week"},
+            {"type": "p", "text": "One post that shows your work (before/after, a finished job, a product). One post that proves you're good at it (a review, a result, a quick tip). One post that shows who's behind the business. That's it — three posts beats seven rushed ones."},
+            {"type": "h2", "text": "Batch it"},
+            {"type": "p", "text": "Set aside one hour a fortnight. Take ten photos on site or in store, write captions in one sitting, schedule everything. Tools that schedule posts are cheap; your time isn't."},
+            {"type": "h2", "text": "Or hand it over"},
+            {"type": "p", "text": "If that hour never happens, that's the signal to outsource. Our social media management runs this exact system for you — calendar, creative, scheduling and a monthly report, from $498/month."},
+        ],
+    },
+]
