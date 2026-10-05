@@ -91,3 +91,8 @@ android-sdk/
 backend/.env
 frontend/.env
 frontend/node_modules/.cache/default-development/0.pack
+.env.*
+*.env
+credentials.json
+*.key
+.credentials
