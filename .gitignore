@@ -88,6 +88,8 @@ android-sdk/
 .env
 .env.local
 .env.production
+.envrc
+.secrets/
 backend/.env
 frontend/.env
 frontend/node_modules/.cache/default-development/0.pack
@@ -95,5 +97,9 @@ frontend/node_modules/.cache/default-development/0.pack
 *.env
 credentials.json
 *.key
+*.p12
+*.pfx
+*.jks
+*.keystore
 .credentials
 frontend/node_modules/.cache/default-development/1.pack

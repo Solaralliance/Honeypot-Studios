@@ -86,10 +86,16 @@ def _customer_details(session) -> tuple[str, str]:
     return details.get("email") or "", details.get("name") or ""
 
 
+def _is_payment_paid(session) -> bool:
+    return session.get("payment_status") == "paid"
+
+
 def create_payments_router(db, send_email: Callable) -> APIRouter:
     router = APIRouter(prefix="/api")
 
     async def fulfil(session) -> None:
+        if not _is_payment_paid(session):
+            return
         session_id = session["id"]
         email, name = _customer_details(session)
         await db.payment_transactions.update_one(
@@ -237,7 +243,7 @@ def create_payments_router(db, send_email: Callable) -> APIRouter:
         if record["payment_status"] != "paid":
             try:
                 session = await _stripe(stripe.checkout.Session.retrieve, session_id)
-                if session.payment_status == "paid" or session.status == "complete":
+                if _is_payment_paid(session):
                     await fulfil(session)
                     record = await db.payment_transactions.find_one(
                         {"session_id": session_id},
